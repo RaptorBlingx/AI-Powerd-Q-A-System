@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 600px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        @media (max-width: 600px) {
+            input[type="text"] {
+                max-width: 100%;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Document Search</h1>
+    <form id="queryForm">
+        <input type="text" id="query" name="query" placeholder="Enter your query" required>
+        <button type="submit">Search</button>
+    </form>
+    <div id="results"></div>
+    
+    <script>
+        document.getElementById('queryForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const query = document.getElementById('query').value;
+            const startTime = performance.now();
+            fetch('/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: query }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const endTime = performance.now();
+                const responseTime = data.response_time.toFixed(2);
+                const totalResponseTime = (endTime - startTime).toFixed(2);
+
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = '<h2>Results</h2>';
+                resultsDiv.innerHTML += `<p>Answer: ${data.answer}</p>`;
+                resultsDiv.innerHTML += `<p>Response Time (Server): ${responseTime} seconds</p>`;
+                resultsDiv.innerHTML += `<p>Total Response Time (Client): ${totalResponseTime} milliseconds</p>`;
+                resultsDiv.innerHTML += '<h3>References:</h3>';
+                data.references.forEach(ref => {
+                    resultsDiv.innerHTML += `<p>Reference: ${ref}</p>`;
+                });
+            });
+        });
+    </script>
+
+    
+</body>
+</html>
